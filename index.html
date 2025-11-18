@@ -237,6 +237,21 @@ button#addMemberBtn {
 }
 </style>
 
+
+<style>
+@media (max-width:768px){
+  #loginScreen{
+    display:flex !important;
+    flex-direction:column !important;
+    justify-content:center !important;
+    align-items:center !important;
+    min-height:100vh !important;
+    padding:0 !important;
+    margin:0 !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="bg-overlay"></div>
@@ -257,7 +272,7 @@ button#addMemberBtn {
      style="height:100vh;width:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;">
 
   <!-- LEFT PANEL -->
-  <div style="flex:1;background:none;
+  <div style="flex:1;background:url('background.jpg') center/cover no-repeat;
               display:flex;align-items:center;justify-content:center;color:white;
               text-shadow:0 0 10px rgba(0,0,0,0.8);padding:40px;">
       
