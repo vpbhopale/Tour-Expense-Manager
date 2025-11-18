@@ -217,6 +217,49 @@ button#addMemberBtn {
   }
 }
 </style>
+
+<style>
+.left-panel {
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.left-panel .overlay {
+    position:absolute;
+    top:0;left:0;right:0;bottom:0;
+    background:linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.2));
+    z-index:1;
+}
+.left-panel .left-text {
+    position:relative;
+    z-index:2;
+}
+
+/* Fade-in animation */
+.fade-in {
+    opacity:0;
+    animation: fadeInUp 1.2s ease forwards;
+}
+@keyframes fadeInUp {
+    from {opacity:0; transform:translateY(20px);}
+    to {opacity:1; transform:translateY(0);}
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .left-panel {
+        height: 28vh !important;
+        padding: 10px !important;
+    }
+    .left-panel .left-text {
+        font-size:24px !important;
+        white-space:nowrap !important;
+        text-align:center !important;
+    }
+}
+</style>
+
 </head>
 <body>
 
@@ -236,10 +279,11 @@ button#addMemberBtn {
      style="height:100vh;width:100%;display:flex;flex-direction:row;overflow:hidden;">
 
   <!-- LEFT PANEL -->
-  <div style="flex:1;background:url('background.jpg') center/cover no-repeat;
+  <div class="left-panel" style="flex:1;background:url(\'background.jpg\') center/cover no-repeat;
               display:flex;align-items:center;justify-content:center;color:white;
               text-shadow:0 0 10px rgba(0,0,0,0.8);padding:40px;">
-      <div class="left-text" style="font-size:32px;font-weight:800;max-width:600px;line-height:1.1;">
+<div class="overlay"></div>
+      <div class="left-text fade-in" style="font-size:32px;font-weight:800;max-width:600px;line-height:1.1;">
           EXPLORE THE WORLD
       </div>
   </div>
