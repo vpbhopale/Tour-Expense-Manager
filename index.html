@@ -158,7 +158,7 @@ button.ghost{
 #root{position:relative;z-index:2}
 body{min-height:100vh;overflow-y:auto}
 
-body{background:url("background.jpg") no-repeat center/cover fixed; background-size:cover;}
+body{background:url("background.jpg") no-repeat center top; background-size:100% 100vh; background-size:cover;}
 
 
 /* REMOVE React's built-in header completely */
@@ -179,7 +179,7 @@ button#addMemberBtn {
     margin-bottom: 12px !important;
 }
 </style>
-<meta content="#ffd2a6" name="theme-color"/>
+
 <style>
 @media (max-width: 768px) {
   #loginScreen {
@@ -355,7 +355,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
 
     return e("div",{className:"container"},
       e("div",{className:"header"},
-        e("div",{className:"title"}, e("h1",null, e("img",{src:"icons/icon-192.png", style:{width:"40px", height:"40px", marginRight:"10px", borderRadius:"8px"}}, null), "Tour Expense Manager"), e("p",{className:"subtitle"},"")),
+        e("div",{className:"title"}, e("h1",null, , "Tour Expense Manager"), e("p",{className:"subtitle"},"")),
         e("div",null, active? e("button",{onClick:()=>setActiveId(null)},"Back to Projects") : null)
       ),
       !active && e(ProjectList,{projects,addProject,openProject:id=>setActiveId(id),deleteProject}),
@@ -972,7 +972,7 @@ function Modal({onClose, title, children}){
   ReactDOM.createRoot(document.getElementById("root")).render(e(App));
 });
 </script>
-<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}</script>
+<script>if('</script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
   // hook header buttons to existing elements in app if available
