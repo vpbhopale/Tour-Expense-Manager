@@ -181,7 +181,11 @@ button#addMemberBtn {
 </style>
 <link href="manifest.json" rel="manifest"/><link href="icons/icon-192.png" rel="apple-touch-icon"/><meta content="#ffd2a6" name="theme-color"/>
 <style>
-
+@media (max-width: 768px) {
+  #loginScreen {
+    flex-direction: column !important;
+    padding-top: 80px !important;
+  }
   #loginScreen > div:first-child {
     flex: none !important;
     height: 40vh !important;
@@ -215,15 +219,27 @@ button#addMemberBtn {
 </style>
 
 <style>
+.bg-overlay {
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2));
+  z-index:-1;
+}
+
+/* fade-in animation */
 @keyframes fadeInUp {
-  from {opacity:0; transform:translateY(20px);}
+  from {opacity:0; transform:translateY(40px);}
   to {opacity:1; transform:translateY(0);}
 }
-.left-text {animation: fadeInUp 1s ease-out;}
+.login-card {
+  animation: fadeInUp 0.8s ease-out;
+}
 </style>
 
 </head>
 <body>
+<div class="bg-overlay"></div>
 
 
 </div>
@@ -238,16 +254,13 @@ button#addMemberBtn {
 
 <!-- MAIN LOGIN LAYOUT -->
 <div id="loginScreen" 
-     style="height:100vh;width:100%;display:flex;flex-direction:row;overflow:hidden;">
+     style="height:100vh;width:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;overflow:hidden;">
 
   <!-- LEFT PANEL -->
-  <div style="flex:1;background:url('background.jpg') center/cover no-repeat;position:relative;
-              display:flex;align-items:center;justify-content:center;color:white;min-height:100vh;
+  <div style="flex:1;background:url('background.jpg') center/cover no-repeat;
+              display:flex;align-items:center;justify-content:center;color:white;
               text-shadow:0 0 10px rgba(0,0,0,0.8);padding:40px;">
-      <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,0.6),rgba(0,0,0,0.2));z-index:1;"></div>
-<div class="left-text" style="font-size:32px;font-weight:800;max-width:600px;line-height:1.1;">
-          EXPLORE THE WORLD
-      </div>
+      
   </div>
 
   <!-- RIGHT LOGIN CARD -->
