@@ -249,49 +249,10 @@ button#addMemberBtn {
 </style>
 
 <style>
-@media (max-width: 600px) {
-  .table th,
-  .table td {
-    font-size: 11px !important;
-    padding: 4px !important;
-  }
-  h2, h3 { font-size: 16px !important; }
-  .card { padding: 10px !important; }
-  button { font-size: 14px !important; padding: 10px !important; }
-  #settlement-area, .table { overflow-x: auto !important; }
-}
-</style>
-
-
-<style>
-/* Smaller buttons in project header card */
-.card > div button {
-  font-size: 12px !important;
-  padding: 6px 8px !important;
-}
-
-/* Delete button placed below amount in expenses table */
-.table td button {
-  display: block !important;
-  margin-top: 4px !important;
-}
-
-/* Prevent table cells from stretching */
-.table td {
-  vertical-align: top !important;
-}
-</style>
-
-
-<style>
-@media(max-width:600px){
-  /* stack amount and action */
-  .table td:nth-child(5){
-    display:flex!important;
-    flex-direction:column!important;
-  }
+@media(max-width:800px){
+  .table th:nth-child(6),
   .table td:nth-child(6){
-    display:none!important;
+    display:none !important;
   }
 }
 </style>
@@ -801,7 +762,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
       e("h3",null,"Expenses"),
       e("table",{className:"table"},
         e("thead",null, e("tr",null, e("th",null,"Date"), e("th",null,"Description"), e("th",null,"Category"), e("th",null,"Paid By"), e("th",null,"Amount"), e("th",null,"Action"))),
-        e("tbody", null, ex.map(x=> e("tr",{key:x.id}, e("td",null,x.date), e("td",null,x.description), e("td",null,x.category), e("td",null,(p.members||[]).find(m=>m.id===x.paidBy)?.name||""), e("td",null,(x.amount||0).toFixed(2)), e("td",null,e("button",{onClick:()=>onDelete(x.id)},"Delete")) )))
+        e("tbody", null, ex.map(x=> e("tr",{key:x.id}, e("td",null,x.date), e("td",null,x.description), e("td",null,x.category), e("td",null,(p.members||[]).find(m=>m.id===x.paidBy)?.name||""), e("td",null,(x.amount||0).toFixed(2), e("div",null, e("button",{onClick:()=>onDelete(x.id)},"Delete"), e("button",{onClick:()=>alert('Edit coming soon')},"Edit"))), e("td",null,"") )))
       )
     );
   }
