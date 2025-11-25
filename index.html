@@ -249,21 +249,15 @@ button#addMemberBtn {
 </style>
 
 <style>
-@media(max-width:800px){
-  .table th:nth-child(6),
-  .table td:nth-child(6){
-    display:none !important;
-  }
+.table-scroll-wrapper{
+  overflow-x:auto!important;
+  width:100%!important;
+}
+.table-scroll-wrapper table{
+  min-width:700px!important;
 }
 </style>
 
-<style>
-/* Hide Action column on all screens */
-.table th:nth-child(6),
-.table td:nth-child(6){
-    display:none !important;
-}
-</style>
 </head>
 <body>
 <div class="bg-overlay"></div>
@@ -770,7 +764,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
       e("h3",null,"Expenses"),
       e("table",{className:"table"},
         e("thead",null, e("tr",null, e("th",null,"Date"), e("th",null,"Description"), e("th",null,"Category"), e("th",null,"Paid By"), e("th",null,"Amount"), e("th",null,"Action"))),
-        e("tbody", null, ex.map(x=> e("tr",{key:x.id}, e("td",null,x.date), e("td",null,x.description), e("td",null,x.category), e("td",null,(p.members||[]).find(m=>m.id===x.paidBy)?.name||""), e("td",null,(x.amount||0).toFixed(2), e("div",null, e("button",{onClick:()=>onDelete(x.id)},"Delete"), e("button",{onClick:()=>alert('Edit coming soon')},"Edit"))), e("td",null,"") )))
+        e("tbody", null, ex.map(x=> e("tr",{key:x.id}, e("td",null,x.date), e("td",null,x.description), e("td",null,x.category), e("td",null,(p.members||[]).find(m=>m.id===x.paidBy)?.name||""), e("td",null,(x.amount||0).toFixed(2)), e("td",null,e("button",{onClick:()=>onDelete(x.id)},"Delete")) )))
       )
     );
   }
