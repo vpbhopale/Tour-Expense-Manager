@@ -247,17 +247,6 @@ button#addMemberBtn {
   #settlement-area button { width: 100%; }
 }
 </style>
-
-<style>
-@media (max-width: 768px) {
-  #root .card:first-of-type button {
-      padding:6px 8px !important;
-      font-size:12px !important;
-      margin:2px !important;
-  }
-}
-</style>
-
 </head>
 <body>
 <div class="bg-overlay"></div>
@@ -758,16 +747,54 @@ document.addEventListener("DOMContentLoaded", ()=> {
   }
 
   /* ---------- ExpenseList ---------- */
-  function ExpenseList({p, onDelete}){
+  function ExpenseList({p, onDelete}) {
     const ex = p.expenses || [];
-    return e("div",{className:"card"},
-      e("h3",null,"Expenses"),
-      e("table",{className:"table"},
-        e("thead",null, e("tr",null, e("th",null,"Date"), e("th",null,"Description"), e("th",null,"Category"), e("th",null,"Paid By"), e("th",null,"Amount"), e("th",null,"Action"))),
-        e("tbody", null, ex.map(x=> e("tr",{key:x.id}, e("td",null,x.date), e("td",null,x.description), e("td",null,x.category), e("td",null,(p.members||[]).find(m=>m.id===x.paidBy)?.name||""), e("td",null,(x.amount||0).toFixed(2)), e("td",null,e("button",{onClick:()=>onDelete(x.id)},"Delete")) )))
-      )
+    const [showDetails, setShowDetails] = React.useState(false);
+
+    return React.createElement("div", { className: "card" },
+        React.createElement("h3", null, "Expenses"),
+
+        // Toggle Button
+        React.createElement("button", {
+            onClick: () => setShowDetails(!showDetails),
+            style: { marginBottom: "10px", padding: "8px 12px", fontWeight: "bold", borderRadius: "8px" }
+        }, showDetails ? "Hide Details" : "Show Details"),
+
+        // Table Wrapper (scroll on mobile)
+        React.createElement("div", { style: { overflowX: "auto" } },
+            React.createElement("table", { className: "table" },
+                React.createElement("thead", null,
+                    React.createElement("tr", null,
+                        showDetails && React.createElement("th", null, "Date"),
+                        React.createElement("th", null, "Description"),
+                        showDetails && React.createElement("th", null, "Category"),
+                        React.createElement("th", null, "Paid By"),
+                        React.createElement("th", null, "Amount"),
+                        showDetails && React.createElement("th", null, "Action")
+                    )
+                ),
+                React.createElement("tbody", null,
+                    ex.map(x =>
+                        React.createElement("tr", { key: x.id },
+                            showDetails && React.createElement("td", null, x.date),
+                            React.createElement("td", null, x.description),
+                            showDetails && React.createElement("td", null, x.category),
+                            React.createElement("td", null,
+                                (p.members || []).find(m => m.id === x.paidBy)?.name || ""
+                            ),
+                            React.createElement("td", null, (x.amount || 0).toFixed(2)),
+                            showDetails &&
+                            React.createElement("td", null,
+                                React.createElement("button", { onClick: () => onDelete(x.id) }, "Delete")
+                            )
+                        )
+                    )
+                )
+            )
+        )
     );
-  }
+}
+
 
   /* ---------- TotalCard ---------- */
   function TotalCard({p}){
