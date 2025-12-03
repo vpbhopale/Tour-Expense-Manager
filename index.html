@@ -525,7 +525,7 @@ document.addEventListener("DOMContentLoaded", ()=> {
         doc.text("Member | Paid | Owed | AdvanceGiven | UsedFromAdvance | FinalNet | Remark", 14, y); y += 6;
 
         settlement.members.forEach(m=>{
-          const line = `${m.name} | ${m.paid.toFixed(2)} | ${m.owed.toFixed(2)} | ${m.totalAdvanceGiven.toFixed(2)} | ${m.usedFromAdvance.toFixed(2)} | ${m.finalNet.toFixed(2)} | ${shorten(settlement.remarks[m.id]||"")}`;
+          const line = `${m.name} | ${m.paid.toFixed(2)} | ${m.owed.toFixed(2)} | ${m.totalAdvanceGiven.toFixed(2)} | ${m.usedFromAdvance.toFixed(0) ? m.usedFromAdvance.toFixed(2) : m.usedFromAdvance.toFixed(2)} | ${m.finalNet.toFixed(2)} | ${shorten(settlement.remarks[m.id]||"")}`;
           const parts = doc.splitTextToSize(line, 270);
           parts.forEach(pLine=>{ doc.text(pLine, 14, y); y+=6; if(y>180){ doc.addPage(); y=14; }});
         });
@@ -803,8 +803,76 @@ document.addEventListener("DOMContentLoaded", ()=> {
   }
 
   
-  
-  
+  /* ---------- New: optimizeTransfers ---------- */
+  // This function nets opposite/repeated transfers so final list shows only optimized amounts.
+  function optimizeTransfers(transactions){
+      // map keyed by "from-to"
+      const map = {};
+      transactions.forEach(t=>{
+          // Identify canonical key regardless of type fields (we'll preserve from/to names & ids)
+          const key = `${t.fromId}-${t.toId}`;
+          const reverseKey = `${t.toId}-${t.fromId}`;
+
+          // ensure numeric amount
+          const amt = +(t.amount || 0);
+
+          if(map[key]){
+              map[key].amount += amt;
+          } else if(map[reverseKey]){
+              // If reverse exists, subtract from it (netting)
+              map[reverseKey].amount -= amt;
+          } else {
+              // store with its original direction
+              map[key] = {
+                  fromId: t.fromId,
+                  from: t.from,
+                  toId: t.toId,
+                  to: t.to,
+                  amount: amt,
+                  // keep original type where helpful; for optimized consumer-facing list we won't rely on type
+                  type: t.type || undefined
+              };
+          }
+      });
+
+      // convert map to normalized array with positive amounts and proper direction
+      const arr = Object.values(map).map(entry=>{
+          // if amount positive -> keep direction, if negative -> flip
+          if(entry.amount >= 0.005){
+              return {
+                  fromId: entry.fromId,
+                  from: entry.from,
+                  toId: entry.toId,
+                  to: entry.to,
+                  amount: +entry.amount.toFixed(2),
+                  type: entry.type
+              };
+          } else if(entry.amount <= -0.005){
+              return {
+                  fromId: entry.toId,
+                  from: entry.to,
+                  toId: entry.fromId,
+                  to: entry.from,
+                  amount: +Math.abs(entry.amount).toFixed(2),
+                  type: entry.type
+              };
+          } else {
+              // effectively zero, ignore
+              return null;
+          }
+      }).filter(x=> x !== null);
+
+      // additionally, combine transactions that now have same fromId-toId (could happen due to different original types)
+      const combine = {};
+      arr.forEach(t=>{
+          const k = `${t.fromId}-${t.toId}`;
+          if(!combine[k]) combine[k] = { ...t };
+          else combine[k].amount = +(combine[k].amount + t.amount).toFixed(2);
+      });
+
+      return Object.values(combine).filter(x => x.amount > 0.009);
+  }
+
   
   /* ---------- Settlement core Option B (FinalNet = AdvanceGiven - Owed) WITH EXPENSE SETTLEMENT + UNUSED RETURNS ---------- */
 function computeSettlement(p){
@@ -888,6 +956,9 @@ function computeSettlement(p){
         });
     }
 
+    // At this point transactions may include opposite directions or duplicates. Optimize them.
+    const optimized = optimizeTransfers(transactions);
+
     // Build remarks per person: only concerned lines
     const remarks = {};
     Object.values(memberInfo).forEach(mi=>{
@@ -897,17 +968,10 @@ function computeSettlement(p){
         parts.push(`FinalNet (Advance - Owed): ₹${mi.finalNet.toFixed(2)}`);
 
         // expense settlements related to this person
-        const expRelated = transactions.filter(t=> t.type==="expense_settlement" && (t.fromId===mi.id || t.toId===mi.id));
+        const expRelated = optimized.filter(t=> (t.fromId===mi.id || t.toId===mi.id));
         expRelated.forEach(t=>{
-            if(t.fromId===mi.id) parts.push(`Pays ₹${t.amount.toFixed(2)} to ${t.to} (expense share)`);
-            if(t.toId===mi.id) parts.push(`Receives ₹${t.amount.toFixed(2)} from ${t.from} (expense share)`);
-        });
-
-        // unused advance returns related to this person
-        const unusedRelated = transactions.filter(t=> t.type==="unused_return" && (t.fromId===mi.id || t.toId===mi.id));
-        unusedRelated.forEach(t=>{
-            if(t.fromId===mi.id) parts.push(`Pays ₹${t.amount.toFixed(2)} to ${t.to} (unused advance return)`);
-            if(t.toId===mi.id) parts.push(`Receives ₹${t.amount.toFixed(2)} from ${t.from} (unused advance return)`);
+            if(t.fromId===mi.id) parts.push(`Pays ₹${t.amount.toFixed(2)} to ${t.to} (settlement)`);
+            if(t.toId===mi.id) parts.push(`Receives ₹${t.amount.toFixed(2)} from ${t.from} (settlement)`);
         });
 
         if(parts.length===3 && Math.abs(mi.finalNet) < 0.01) parts.push("Settled");
@@ -919,7 +983,42 @@ function computeSettlement(p){
         totalAdvanceGiven:+x.totalAdvanceGiven, usedFromAdvance:+x.usedFromAdvance, finalNet:+x.finalNet
     }));
 
-    return { members: resultMembers, transactions, remarks };
+    return { members: resultMembers, transactions: optimized, remarks };
+}
+function optimizeTransfers(transactions) {
+    const map = {};
+
+    transactions.forEach(t => {
+        const key1 = `${t.fromId}-${t.toId}`;
+        const key2 = `${t.toId}-${t.fromId}`;
+
+        if (map[key1]) {
+            map[key1].amount += t.amount;
+        } else if (map[key2]) {
+            map[key2].amount -= t.amount;
+        } else {
+            map[key1] = {
+                fromId: t.fromId,
+                from: t.from,
+                toId: t.toId,
+                to: t.to,
+                amount: t.amount
+            };
+        }
+    });
+
+    return Object.values(map)
+        .map(x => {
+            if (x.amount > 0) return x;
+            return {
+                fromId: x.toId,
+                from: x.to,
+                toId: x.fromId,
+                to: x.from,
+                amount: Math.abs(x.amount)
+            };
+        })
+        .filter(x => x.amount > 0.01);
 }
 
   
@@ -927,6 +1026,9 @@ function computeSettlement(p){
 function SettlementPanel({p}){
     const res = computeSettlement(p);
     const [showDetails, setShowDetails] = React.useState(false);
+
+    // optimized transactions are already provided by computeSettlement
+    const optimized = optimizeTransfers(res.transactions);
 
     return e("div",{className:"card", id:"settlement-area"},
       e("h3",null,"Settlement Summary"),
@@ -964,10 +1066,11 @@ function SettlementPanel({p}){
       ),
 
       e("div",{style:{marginTop:8}},
-        res.transactions.length ? e("div",null,
+        optimized.length ? e("div",null,
           e("strong",null,"Transfers:"),
           e("ul",null,
-            res.transactions.map((t,i)=> e("li",{key:i}, `${t.from} → ${t.to}: ₹${t.amount.toFixed(2)}`))
+            optimized.map((t,i)=> 
+e("li",{key:i}, `${t.from} → ${t.to}: ₹${t.amount.toFixed(2)}`))
           )
         ) : e("p",null,"All settled — no transfers needed.")
       )
